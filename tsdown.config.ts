@@ -20,18 +20,11 @@ const shared = {
   format: ["esm"] as const,
   target: "node20" as const,
   inlineOnly: false as const,
-  // Keep as node_modules imports. We never import onnxruntime-{node,web}
-  // directly; they come in transitively through @huggingface/transformers, which
-  // is lazy-loaded from src/providers/embedding/{clip,local}.ts and
-  // src/state/reranker.ts. Bundling inlines relative paths like
-  // `../bin/napi-v3/darwin/arm64/onnxruntime_binding.node` that no longer
-  // resolve from dist/. All three are declared as optionalDependencies in
-  // package.json so users can install them only when they enable local
-  // embeddings / CLIP / reranker.
+  // Keep Transformers.js as a node_modules import. It is lazy-loaded from
+  // src/providers/embedding/{clip,local}.ts and src/state/reranker.ts, and it
+  // brings the appropriate ONNX Runtime packages transitively.
   external: [
     "@huggingface/transformers",
-    "onnxruntime-node",
-    "onnxruntime-web",
     "@anthropic-ai/claude-agent-sdk",
     "@anthropic-ai/sdk",
   ] as const,
