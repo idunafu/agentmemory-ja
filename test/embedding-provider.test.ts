@@ -35,6 +35,7 @@ describe("createEmbeddingProvider", () => {
     delete process.env["EMBEDDING_PROVIDER"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DTYPE"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DOCUMENT_PREFIX"];
     mockPipeline.mockClear();
@@ -87,6 +88,7 @@ describe("LocalEmbeddingProvider", () => {
     process.env = { ...originalEnv };
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DTYPE"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DOCUMENT_PREFIX"];
     mockPipeline.mockClear();
@@ -99,13 +101,14 @@ describe("LocalEmbeddingProvider", () => {
 
   it("uses the default local embedding model and dimensions", async () => {
     const provider = new LocalEmbeddingProvider();
-    expect(provider.dimensions).toBe(768);
+    expect(provider.dimensions).toBe(384);
 
     await provider.embed("hello");
 
     expect(mockPipeline).toHaveBeenCalledWith(
       "feature-extraction",
-      "cl-nagoya/ruri-v3-310m",
+      "sirasagi62/ruri-v3-70m-ONNX",
+      { dtype: "q8" },
     );
     expect(mockExtractor).toHaveBeenCalledWith(["hello"], {
       pooling: "mean",
@@ -123,6 +126,32 @@ describe("LocalEmbeddingProvider", () => {
     expect(mockPipeline).toHaveBeenCalledWith(
       "feature-extraction",
       "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      { dtype: "q8" },
+    );
+  });
+
+  it("allows local embedding dtype to be overridden or omitted", async () => {
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DTYPE"] = "fp16";
+    const fp16Provider = new LocalEmbeddingProvider();
+
+    await fp16Provider.embed("こんにちは");
+
+    expect(mockPipeline).toHaveBeenLastCalledWith(
+      "feature-extraction",
+      "sirasagi62/ruri-v3-70m-ONNX",
+      { dtype: "fp16" },
+    );
+
+    mockPipeline.mockClear();
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DTYPE"] = "";
+    const autoProvider = new LocalEmbeddingProvider();
+
+    await autoProvider.embed("こんにちは");
+
+    expect(mockPipeline).toHaveBeenLastCalledWith(
+      "feature-extraction",
+      "sirasagi62/ruri-v3-70m-ONNX",
+      undefined,
     );
   });
 

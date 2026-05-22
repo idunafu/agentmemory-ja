@@ -4,6 +4,7 @@ import { getEnvVar } from "../../config.js";
 type Pipeline = (
   task: string,
   model: string,
+  options?: Record<string, unknown>,
 ) => Promise<
   (
     texts: string[],
@@ -11,8 +12,9 @@ type Pipeline = (
   ) => Promise<{ tolist: () => number[][] }>
 >;
 
-const DEFAULT_MODEL = "cl-nagoya/ruri-v3-310m";
-const DEFAULT_DIMENSIONS = 768;
+const DEFAULT_MODEL = "sirasagi62/ruri-v3-70m-ONNX";
+const DEFAULT_DIMENSIONS = 384;
+const DEFAULT_DTYPE = "q8";
 const RURI_QUERY_PREFIX = "検索クエリ: ";
 const RURI_DOCUMENT_PREFIX = "検索文書: ";
 
@@ -31,6 +33,7 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
   readonly name = "local";
   readonly dimensions: number;
   private readonly model: string;
+  private readonly dtype: string;
   private readonly queryPrefix: string;
   private readonly documentPrefix: string;
   private extractor: Awaited<ReturnType<Pipeline>> | null = null;
@@ -40,6 +43,8 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
     this.dimensions = resolveDimensions(
       getEnvVar("AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"),
     );
+    this.dtype =
+      getEnvVar("AGENTMEMORY_LOCAL_EMBEDDING_DTYPE")?.trim() ?? DEFAULT_DTYPE;
     const isRuri = /(^|\/)ruri-v3-/i.test(this.model);
     this.queryPrefix =
       getEnvVar("AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX") ??
@@ -95,6 +100,7 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
     this.extractor = await transformers.pipeline(
       "feature-extraction",
       this.model,
+      this.dtype ? { dtype: this.dtype } : undefined,
     );
     return this.extractor;
   }
