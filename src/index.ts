@@ -12,6 +12,7 @@ import {
   isConsolidationEnabled,
   isContextInjectionEnabled,
   isDropStaleIndexEnabled,
+  applyEnvFileToProcessEnv,
 } from "./config.js";
 import {
   createProvider,
@@ -97,6 +98,8 @@ import { registerHealthMonitor } from "./health/monitor.js";
 import { initMetrics, OTEL_CONFIG } from "./telemetry/setup.js";
 import { VERSION } from "./version.js";
 import { bootLog } from "./logger.js";
+
+applyEnvFileToProcessEnv();
 
 function hasGetMeter(
   sdk: unknown,

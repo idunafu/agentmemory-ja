@@ -43,6 +43,13 @@ function loadEnvFile(): Record<string, string> {
   return vars;
 }
 
+export function applyEnvFileToProcessEnv(): void {
+  const fileEnv = loadEnvFile();
+  for (const [key, value] of Object.entries(fileEnv)) {
+    process.env[key] ??= value;
+  }
+}
+
 function hasRealValue(v: string | undefined): v is string {
   return typeof v === "string" && v.trim().length > 0;
 }

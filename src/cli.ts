@@ -43,9 +43,11 @@ import { isFirstRun, readPrefs, resetPrefs, writePrefs } from "./cli/preferences
 import { runOnboarding } from "./cli/onboarding.js";
 import { setBootVerbose } from "./logger.js";
 import { VERSION } from "./version.js";
+import { applyEnvFileToProcessEnv } from "./config.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
+applyEnvFileToProcessEnv();
 const IS_WINDOWS = platform() === "win32";
 const IS_VERBOSE =
   args.includes("--verbose") ||

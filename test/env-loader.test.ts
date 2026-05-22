@@ -30,6 +30,7 @@ describe("loadEnvFile", () => {
     delete process.env["GRAPH_EXTRACTION_ENABLED"];
     delete process.env["TOKEN"];
     delete process.env["HASHVAL"];
+    delete process.env["RERANK_ENABLED"];
   });
 
   afterEach(() => {
@@ -88,5 +89,16 @@ describe("loadEnvFile", () => {
     writeEnv("AGENTMEMORY_DROP_STALE_INDEX=true");
     const cfg = await freshConfig();
     expect(cfg.isDropStaleIndexEnabled()).toBe(true);
+  });
+
+  it("can hydrate process.env without overriding explicit environment values", async () => {
+    writeEnv(["RERANK_ENABLED=true", "TOKEN=file"].join("\n"));
+    process.env["TOKEN"] = "shell";
+
+    const cfg = await freshConfig();
+    cfg.applyEnvFileToProcessEnv();
+
+    expect(process.env["RERANK_ENABLED"]).toBe("true");
+    expect(process.env["TOKEN"]).toBe("shell");
   });
 });
