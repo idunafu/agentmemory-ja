@@ -78,7 +78,7 @@ export async function runAdapter(
 
 export async function runConnect(args: string[]): Promise<void> {
   if (platform() === "win32") {
-    p.intro("agentmemory connect");
+    p.intro("agentmemory-ja connect");
     p.log.warn(
       "Windows: automated `connect` is not supported yet. See https://github.com/rohitg00/agentmemory#other-agents for manual install steps.",
     );
@@ -89,7 +89,7 @@ export async function runConnect(args: string[]): Promise<void> {
   const { dryRun, force, all, withHooks, positional } = parseFlags(args);
   const opts: ConnectOptions = { dryRun, force, withHooks };
 
-  p.intro("agentmemory connect");
+  p.intro("agentmemory-ja connect");
 
   if (positional.length === 0 && !all) {
     const detected = ADAPTERS.filter((a) => a.detect());

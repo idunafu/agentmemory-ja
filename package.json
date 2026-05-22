@@ -1,5 +1,5 @@
 {
-  "name": "@agentmemory/agentmemory",
+  "name": "@idunafu/agentmemory-ja",
   "version": "0.9.21",
   "description": "Persistent memory for AI coding agents, powered by iii-engine's three primitives",
   "type": "module",
@@ -14,10 +14,10 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "agentmemory": "dist/cli.mjs"
+    "agentmemory-ja": "dist/cli.mjs"
   },
   "scripts": {
-    "build": "tsdown && (cp iii-config.yaml dist/ 2>/dev/null || true) && (cp iii-config.docker.yaml dist/ 2>/dev/null || true) && (cp docker-compose.yml dist/ 2>/dev/null || true) && (cp .env.example dist/ 2>/dev/null || true) && mkdir -p dist/viewer && cp src/viewer/index.html dist/viewer/ && cp src/viewer/favicon.svg dist/viewer/",
+    "build": "tsdown && node scripts/copy-build-assets.mjs",
     "dev": "tsx src/index.ts",
     "start": "node dist/cli.mjs",
     "migrate": "node dist/functions/migrate.js",
@@ -55,7 +55,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rohitg00/agentmemory"
+    "url": "https://github.com/idunafu/agentmemory-ja"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.142",

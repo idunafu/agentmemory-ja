@@ -51,7 +51,7 @@ export type RemoveContext = {
 };
 
 /**
- * The `agentmemory connect` PR writes this manifest at
+ * The `agentmemory-ja connect` PR writes this manifest at
  * ~/.agentmemory/backups/connect-manifest.json. We tolerate it being absent
  * (older versions, fresh installs) by treating it as `{ installed: [] }`.
  */

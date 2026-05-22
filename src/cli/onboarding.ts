@@ -246,12 +246,12 @@ export async function runOnboarding(): Promise<OnboardingResult> {
 async function wireSelectedAgents(agents: string[]): Promise<void> {
   p.note("Wire selected agents now?", "next step");
   const confirmed = await p.confirm({
-    message: "Run `agentmemory connect <agent>` for each selected agent now? [Y/n]",
+    message: "Run `agentmemory-ja connect <agent>` for each selected agent now? [Y/n]",
     initialValue: true,
   });
 
   if (p.isCancel(confirmed) || confirmed === false) {
-    const cmds = agents.map((a) => `  agentmemory connect ${a}`);
+    const cmds = agents.map((a) => `  agentmemory-ja connect ${a}`);
     p.note(["Wire later with:", ...cmds].join("\n"), "later");
     return;
   }

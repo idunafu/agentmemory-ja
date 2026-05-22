@@ -22,8 +22,8 @@ const CODEX_TOML = join(CODEX_DIR, "config.toml");
 const CODEX_HOOKS = join(CODEX_DIR, "hooks.json");
 
 const TOML_BLOCK = `[mcp_servers.agentmemory]
-command = "npx"
-args = ["-y", "@agentmemory/mcp"]
+command = "agentmemory-ja"
+args = ["mcp"]
 
 [mcp_servers.agentmemory.env]
 AGENTMEMORY_URL = "http://localhost:3111"
@@ -169,7 +169,7 @@ function installCodexHooks(opts: ConnectOptions): ConnectResult {
 
   logInstalled("Codex hooks (workaround for openai/codex#16430)", CODEX_HOOKS);
   p.log.info(
-    "User-scope hooks reference absolute paths under the bundled plugin/ dir. Re-run `agentmemory connect codex --with-hooks` after upgrading agentmemory to refresh them.",
+    "User-scope hooks reference absolute paths under the bundled plugin/ dir. Re-run `agentmemory-ja connect codex --with-hooks` after upgrading agentmemory-ja to refresh them.",
   );
 
   return {

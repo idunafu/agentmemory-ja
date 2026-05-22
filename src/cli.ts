@@ -110,14 +110,14 @@ function vlog(msg: string): void {
 
 if (args.includes("--help") || args.includes("-h")) {
   console.log(`
-agentmemory — persistent memory for AI coding agents
+agentmemory-ja — persistent memory for AI coding agents
 
-Usage: agentmemory [command] [options]
+Usage: agentmemory-ja [command] [options]
 
 Commands:
-  (default)          Start agentmemory worker
+  (default)          Start agentmemory-ja worker
   init               Copy bundled .env.example to ~/.agentmemory/.env if absent
-  connect [agent]    Wire agentmemory into an installed agent (claude-code, codex,
+  connect [agent]    Wire agentmemory-ja into an installed agent (claude-code, codex,
                      cursor, gemini-cli, openclaw, hermes, pi, openhuman).
                      No arg = interactive picker. --all wires every detected agent.
                      --dry-run shows what would change. --force re-installs.
@@ -125,7 +125,7 @@ Commands:
   doctor             Interactive diagnostic + fixer. [F]ix · [S]kip · [?]more · [Q]uit
                      --all: apply every fix without prompting (CI)
                      --dry-run: show what each fix would do, don't execute
-  remove             Cleanly uninstall agentmemory (pidfile, state, .env, binaries).
+  remove             Cleanly uninstall agentmemory-ja (pidfile, state, .env, binaries).
                      --force: skip confirmations · --keep-data: keep memory data
   demo               Seed sample sessions and show recall in action
   upgrade            Upgrade local deps + iii runtime (best effort)
@@ -155,13 +155,12 @@ Environment:
   AGENTMEMORY_III_VERSION      Override pinned iii-engine version (default ${IIPINNED_VERSION}).
 
 Quick start:
-  npx @agentmemory/agentmemory          # start with local iii-engine or Docker
-  npx @agentmemory/agentmemory demo     # see semantic recall in 30 seconds
-  npx @agentmemory/agentmemory doctor   # diagnose config + feature flags
-  npx @agentmemory/agentmemory status   # health + memory count + flags
-  npx @agentmemory/agentmemory upgrade  # upgrade agentmemory + iii runtime
-  npx @agentmemory/agentmemory mcp      # standalone MCP server (no engine)
-  npx @agentmemory/mcp                  # same as above (shim package)
+  agentmemory-ja          # start with local iii-engine or Docker
+  agentmemory-ja demo     # see semantic recall in 30 seconds
+  agentmemory-ja doctor   # diagnose config + feature flags
+  agentmemory-ja status   # health + memory count + flags
+  agentmemory-ja upgrade  # upgrade agentmemory + iii runtime
+  agentmemory-ja mcp      # standalone MCP server (no engine)
 `);
   process.exit(0);
 }
@@ -471,7 +470,7 @@ async function maybeOfferGlobalInstall(): Promise<void> {
 
   const answer = await p.confirm({
     message:
-      "Install agentmemory globally so the bare `agentmemory` command works in any shell? [Y/n]",
+      "Install agentmemory globally so the bare `agentmemory-ja` command works in any shell? [Y/n]",
     initialValue: true,
   });
   if (p.isCancel(answer)) {
@@ -481,7 +480,7 @@ async function maybeOfferGlobalInstall(): Promise<void> {
   if (answer === false) {
     writePrefs({ skipGlobalInstall: true });
     p.log.info(
-      "Skipped. Re-run via `npx @agentmemory/agentmemory` or install later with: npm install -g @agentmemory/agentmemory",
+      "Skipped. Re-run via `agentmemory-ja` or install later with: npm install -g @idunafu/agentmemory-ja",
     );
     return;
   }
@@ -489,14 +488,14 @@ async function maybeOfferGlobalInstall(): Promise<void> {
   const npmBin = whichBinary("npm");
   if (!npmBin) {
     p.log.warn(
-      "npm not found on PATH. Install manually: npm install -g @agentmemory/agentmemory",
+      "npm not found on PATH. Install manually: npm install -g @idunafu/agentmemory-ja",
     );
     return;
   }
   const ok = runCommand(
     npmBin,
-    ["install", "-g", `@agentmemory/agentmemory@${VERSION}`],
-    { label: `Installing @agentmemory/agentmemory@${VERSION} globally` },
+    ["install", "-g", `@idunafu/agentmemory-ja@${VERSION}`],
+    { label: `Installing @idunafu/agentmemory-ja@${VERSION} globally` },
   );
   if (ok) {
     p.log.success(
@@ -507,7 +506,7 @@ async function maybeOfferGlobalInstall(): Promise<void> {
     writePrefs({ skipGlobalInstall: true });
   } else {
     p.log.warn(
-      "Global install failed. Try manually: npm install -g @agentmemory/agentmemory",
+      "Global install failed. Try manually: npm install -g @idunafu/agentmemory-ja",
     );
   }
 }
@@ -868,12 +867,12 @@ function installInstructions(): string[] {
       `     1. Open https://github.com/iii-hq/iii/releases/tag/iii%2Fv${IIPINNED_VERSION}`,
       `     2. Download iii-x86_64-pc-windows-msvc.zip (or iii-aarch64-pc-windows-msvc.zip on ARM)`,
       "     3. Extract iii.exe to %USERPROFILE%\\.local\\bin\\iii.exe (or add to PATH)",
-      "     4. Re-run: npx @agentmemory/agentmemory",
+      "     4. Re-run: agentmemory-ja",
       "",
       `  B) Docker: docker pull iiidev/iii:${IIPINNED_VERSION}`,
-      "     Re-run with AGENTMEMORY_USE_DOCKER=1 npx @agentmemory/agentmemory",
+      "     Re-run with AGENTMEMORY_USE_DOCKER=1 agentmemory-ja",
       "",
-      "Or skip the engine entirely (standalone MCP):  npx @agentmemory/agentmemory mcp",
+      "Or skip the engine entirely (standalone MCP):  agentmemory-ja mcp",
       "",
       "Docs: https://iii.dev/docs",
     ];
@@ -885,12 +884,12 @@ function installInstructions(): string[] {
     `agentmemory needs iii-engine v${IIPINNED_VERSION}. Pick one:`,
     "",
     linuxInstall,
-    "     Then re-run: npx @agentmemory/agentmemory",
+    "     Then re-run: agentmemory-ja",
     "",
     `  B) Docker: docker pull iiidev/iii:${IIPINNED_VERSION}`,
-    "     Re-run with AGENTMEMORY_USE_DOCKER=1 npx @agentmemory/agentmemory",
+    "     Re-run with AGENTMEMORY_USE_DOCKER=1 agentmemory-ja",
     "",
-    "Or skip the engine entirely (standalone MCP):  npx @agentmemory/agentmemory mcp",
+    "Or skip the engine entirely (standalone MCP):  agentmemory-ja mcp",
     "",
     "Docs: https://iii.dev/docs",
   ];
@@ -962,13 +961,13 @@ function printReadyHint(consoleState: IiiConsoleState): void {
   p.note(lines.join("\n"), `agentmemory v${VERSION}`);
 
   // Pick a runnable form for the suggested next-step. Users invoked
-  // via `npx` don't have the bare `agentmemory` command on PATH yet
+  // via `npx` don't have the bare `agentmemory-ja` command on PATH yet
   // (unless they accepted the global-install prompt and the npm bin
   // dir was already on PATH in this shell), so we suggest the npx
   // form for them; everyone else gets the global form.
   const demoCommand = isInvokedViaNpx()
-    ? "npx @agentmemory/agentmemory demo"
-    : "agentmemory demo";
+    ? "agentmemory-ja demo"
+    : "agentmemory-ja demo";
   process.stdout.write(`\nTry: ${demoCommand}\n`);
 }
 
@@ -1026,7 +1025,7 @@ async function main() {
     if (startupFailure?.kind === "no-docker-compose") {
       lines.unshift(
         "Docker is installed but docker-compose.yml is missing from this",
-        "install. Re-install with: npm install -g @agentmemory/agentmemory",
+        "install. Re-install with: npm install -g @idunafu/agentmemory-ja",
         "",
       );
     }
@@ -1112,12 +1111,12 @@ async function apiFetch<T = unknown>(base: string, path: string, timeoutMs = 500
 async function runStatus() {
   const port = getRestPort();
   const base = getBaseUrl();
-  p.intro("agentmemory status");
+  p.intro("agentmemory-ja status");
 
   const up = await isEngineRunning();
   if (!up) {
     p.log.error(`Not running — no response at ${base}`);
-    p.log.info("Start with: npx @agentmemory/agentmemory");
+    p.log.info("Start with: agentmemory-ja");
     process.exit(1);
   }
 
@@ -1413,7 +1412,7 @@ async function passiveServerChecks(): Promise<DoctorCheck[]> {
     ok: serverUp,
     hint: serverUp
       ? undefined
-      : `Start with: npx @agentmemory/agentmemory (tried ${base})`,
+      : `Start with: agentmemory-ja (tried ${base})`,
   });
   if (!serverUp) return checks;
 
@@ -1538,7 +1537,7 @@ async function applyFixWithReport(
 }
 
 async function runDoctor() {
-  p.intro("agentmemory doctor");
+  p.intro("agentmemory-ja doctor");
   const applyAll = args.includes("--all");
   const dryRun = args.includes("--dry-run");
   if (applyAll && dryRun) {
@@ -1841,7 +1840,7 @@ async function runInit() {
   const template = findEnvExample();
   if (!template) {
     p.log.error(
-      "Could not locate .env.example in the package. Re-install with: npm i -g @agentmemory/agentmemory",
+      "Could not locate .env.example in the package. Re-install with: npm i -g @idunafu/agentmemory-ja",
     );
     process.exit(1);
   }
@@ -1878,8 +1877,8 @@ async function runInit() {
       "",
       "Common next steps:",
       "  1. Pick an LLM provider key (ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY / etc.)",
-      "  2. Run `npx @agentmemory/agentmemory doctor` to verify the daemon sees them",
-      "  3. Run `npx @agentmemory/agentmemory` to start the worker",
+      "  2. Run `agentmemory-ja doctor` to verify the daemon sees them",
+      "  3. Run `agentmemory-ja` to start the worker",
     ].join("\n"),
     "Next steps",
   );
@@ -1889,13 +1888,13 @@ async function runInit() {
 async function runDemo() {
   const port = getRestPort();
   const base = `http://localhost:${port}`;
-  p.intro("agentmemory demo");
+  p.intro("agentmemory-ja demo");
 
   if (!(await isAgentmemoryReady())) {
     p.log.error(
       `agentmemory worker not reachable on port ${port} (livez probe failed). Something may be on the port but it isn't serving /agentmemory/*.`,
     );
-    p.log.info("Start it with: npx @agentmemory/agentmemory");
+    p.log.info("Start it with: agentmemory-ja");
     process.exit(1);
   }
 
@@ -1983,7 +1982,7 @@ function runCommand(
 }
 
 async function runUpgrade() {
-  p.intro("agentmemory upgrade");
+  p.intro("agentmemory-ja upgrade");
 
   const cwd = process.cwd();
   const hasPackageJson = existsSync(join(cwd, "package.json"));
@@ -2056,11 +2055,11 @@ async function runUpgrade() {
       "Upgrade flow completed.",
       "",
       "Recommended next steps:",
-      "  1) agentmemory status",
+      "  1) agentmemory-ja status",
       "  2) npm/pnpm test",
       "  3) restart agentmemory process",
     ].join("\n"),
-    "agentmemory upgrade",
+    "agentmemory-ja upgrade",
   );
 }
 
@@ -2157,7 +2156,7 @@ async function stopDockerEngine(composeFile: string, port: number): Promise<void
     );
     process.exit(1);
   }
-  p.outro("Stopped. Memories persisted to disk; restart anytime with: npx @agentmemory/agentmemory");
+  p.outro("Stopped. Memories persisted to disk; restart anytime with: agentmemory-ja");
 }
 
 async function runStop(): Promise<void> {
@@ -2242,7 +2241,7 @@ async function runStop(): Promise<void> {
     p.log.error("One or more engine processes survived SIGKILL. Investigate with `ps`.");
     process.exit(1);
   }
-  p.outro("Stopped. Memories persisted to disk; restart anytime with: npx @agentmemory/agentmemory");
+  p.outro("Stopped. Memories persisted to disk; restart anytime with: agentmemory-ja");
 }
 
 async function runMcp(): Promise<void> {
@@ -2316,7 +2315,7 @@ async function runImportJsonl(): Promise<void> {
   }
   if (!probeOk) {
     p.log.error(
-      `agentmemory livez probe failed on port ${port}: ${probeDetail}. Start it with \`npx @agentmemory/agentmemory\` in another terminal, then re-run this command.`,
+      `agentmemory livez probe failed on port ${port}: ${probeDetail}. Start it with \`agentmemory-ja\` in another terminal, then re-run this command.`,
     );
     process.exit(1);
   }
@@ -2568,7 +2567,7 @@ async function runRemove(): Promise<void> {
   }
 
   p.outro(
-    "Done. agentmemory cleanly removed. The npm package itself: npm uninstall -g @agentmemory/agentmemory",
+    "Done. agentmemory cleanly removed. The npm package itself: npm uninstall -g @idunafu/agentmemory-ja",
   );
 }
 

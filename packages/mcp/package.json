@@ -1,10 +1,10 @@
 {
-  "name": "@agentmemory/mcp",
+  "name": "@idunafu/agentmemory-ja-mcp",
   "version": "0.9.21",
-  "description": "Standalone MCP server for agentmemory — thin shim that re-exposes @agentmemory/agentmemory's MCP entrypoint",
+  "description": "Standalone MCP server for agentmemory-ja — thin shim that re-exposes @idunafu/agentmemory-ja's MCP entrypoint",
   "type": "module",
   "bin": {
-    "agentmemory-mcp": "./bin.mjs"
+    "agentmemory-ja-mcp": "./bin.mjs"
   },
   "files": [
     "bin.mjs",
@@ -22,13 +22,13 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rohitg00/agentmemory",
+    "url": "https://github.com/idunafu/agentmemory-ja",
     "directory": "packages/mcp"
   },
-  "homepage": "https://github.com/rohitg00/agentmemory#readme",
-  "bugs": "https://github.com/rohitg00/agentmemory/issues",
+  "homepage": "https://github.com/idunafu/agentmemory-ja#readme",
+  "bugs": "https://github.com/idunafu/agentmemory-ja/issues",
   "dependencies": {
-    "@agentmemory/agentmemory": "~0.9.0"
+    "@idunafu/agentmemory-ja": "~0.9.21"
   },
   "publishConfig": {
     "access": "public",

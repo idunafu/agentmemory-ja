@@ -18,7 +18,7 @@
 Start the agentmemory server in a separate terminal:
 
 ```bash
-npx @agentmemory/agentmemory
+agentmemory-ja
 ```
 
 Copy this folder into pi's global extensions directory:

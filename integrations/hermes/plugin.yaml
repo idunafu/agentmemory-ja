@@ -1,8 +1,8 @@
 name: agentmemory
 version: 0.8.0
-description: "Persistent cross-session memory for Hermes Agent via agentmemory. 95.2% retrieval accuracy on LongMemEval."
+description: "Persistent cross-session memory for Hermes Agent via agentmemory-ja."
 author: "Rohit Ghumare"
-homepage: "https://github.com/rohitg00/agentmemory"
+homepage: "https://github.com/idunafu/agentmemory-ja"
 hooks:
   - prefetch
   - sync_turn

@@ -25,9 +25,9 @@ type ClaudeConfig = {
 function entryMatches(entry: unknown): boolean {
   if (!entry || typeof entry !== "object") return false;
   const e = entry as Record<string, unknown>;
-  if (e["command"] !== "npx") return false;
+  if (e["command"] !== "agentmemory-ja") return false;
   const args = Array.isArray(e["args"]) ? (e["args"] as string[]) : [];
-  return args.includes("@agentmemory/mcp");
+  return args.includes("mcp");
 }
 
 export const adapter: ConnectAdapter = {

@@ -104,8 +104,8 @@ describe("agentmemory connect — claude-code adapter (mock filesystem)", () => 
     expect(first.kind).toBe("installed");
 
     const config = JSON.parse(readFileSync(join(tmpHome, ".claude.json"), "utf-8"));
-    expect(config.mcpServers.agentmemory.command).toBe("npx");
-    expect(config.mcpServers.agentmemory.args).toContain("@agentmemory/mcp");
+    expect(config.mcpServers.agentmemory.command).toBe("agentmemory-ja");
+    expect(config.mcpServers.agentmemory.args).toContain("mcp");
     expect(config.mcpServers.other.command).toBe("x");
 
     const second = await a.install({ dryRun: false, force: false });
@@ -139,7 +139,7 @@ describe("agentmemory connect — claude-code adapter (mock filesystem)", () => 
       join(tmpHome, ".claude.json"),
       JSON.stringify({
         mcpServers: {
-          agentmemory: { command: "npx", args: ["-y", "@agentmemory/mcp"] },
+          agentmemory: { command: "agentmemory-ja", args: ["mcp"] },
         },
       }),
     );
@@ -175,7 +175,7 @@ describe("agentmemory connect — claude-code adapter (mock filesystem)", () => 
     if (result.kind === "installed") {
       expect(result.backupPath).toBeDefined();
       expect(existsSync(result.backupPath!)).toBe(true);
-      expect(result.backupPath!).toContain(".agentmemory/backups");
+      expect(result.backupPath!.replaceAll("\\", "/")).toContain(".agentmemory/backups");
     }
   });
 });

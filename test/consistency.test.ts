@@ -103,7 +103,7 @@ describe("Consistency checks", () => {
         files.includes(`${topLevel}/`);
       expect(
         covered,
-        `docker-compose.yml mounts ./${src} but package.json "files" does not ship it — ${topLevel} would be auto-created as an empty dir on install, breaking \`npx @agentmemory/agentmemory\``,
+        `docker-compose.yml mounts ./${src} but package.json "files" does not ship it — ${topLevel} would be auto-created as an empty dir on install, breaking \`agentmemory-ja\``,
       ).toBe(true);
     }
   });

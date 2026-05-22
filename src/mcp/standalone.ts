@@ -48,11 +48,11 @@ function announceMode(handle: Handle): void {
   modeAnnounced = true;
   if (handle.mode === "proxy") {
     process.stderr.write(
-      `[@agentmemory/mcp] proxying to agentmemory server at ${handle.baseUrl}\n`,
+      `[@idunafu/agentmemory-ja-mcp] proxying to agentmemory server at ${handle.baseUrl}\n`,
     );
   } else {
     process.stderr.write(
-      `[@agentmemory/mcp] no server reachable at ${displayAgentmemoryUrl()}; falling back to local InMemoryKV\n`,
+      `[@idunafu/agentmemory-ja-mcp] no server reachable at ${displayAgentmemoryUrl()}; falling back to local InMemoryKV\n`,
     );
   }
 }
@@ -368,7 +368,7 @@ export async function handleToolCall(
         return await handleProxyGeneric(toolName, args, handle);
       } catch (err) {
         process.stderr.write(
-          `[@agentmemory/mcp] proxy call failed for ${toolName}: ${err instanceof Error ? err.message : String(err)}\n`,
+          `[@idunafu/agentmemory-ja-mcp] proxy call failed for ${toolName}: ${err instanceof Error ? err.message : String(err)}\n`,
         );
         invalidateHandle();
         throw err;
@@ -385,7 +385,7 @@ export async function handleToolCall(
       return await handleProxy(validated, handle);
     } catch (err) {
       process.stderr.write(
-        `[@agentmemory/mcp] proxy call failed for ${toolName}: ${err instanceof Error ? err.message : String(err)}; invalidating handle and falling back to local KV\n`,
+        `[@idunafu/agentmemory-ja-mcp] proxy call failed for ${toolName}: ${err instanceof Error ? err.message : String(err)}; invalidating handle and falling back to local KV\n`,
       );
       invalidateHandle();
     }
@@ -399,7 +399,7 @@ export async function handleToolsList(): Promise<{ tools: unknown[] }> {
   announceMode(handle);
   if (debug) {
     process.stderr.write(
-      `[@agentmemory/mcp] tools/list: handle.mode=${handle.mode}${handle.mode === "proxy" ? ` baseUrl=${handle.baseUrl}` : ""}\n`,
+      `[@idunafu/agentmemory-ja-mcp] tools/list: handle.mode=${handle.mode}${handle.mode === "proxy" ? ` baseUrl=${handle.baseUrl}` : ""}\n`,
     );
   }
   if (handle.mode === "proxy") {
@@ -414,23 +414,23 @@ export async function handleToolsList(): Promise<{ tools: unknown[] }> {
             ? typeof remote
             : `keys=${Object.keys(remote as object).join(",")} toolsType=${Array.isArray((remote as { tools?: unknown }).tools) ? `array(len=${((remote as { tools: unknown[] }).tools).length})` : typeof (remote as { tools?: unknown }).tools}`;
         process.stderr.write(
-          `[@agentmemory/mcp] tools/list: remote response shape: ${shape}\n`,
+          `[@idunafu/agentmemory-ja-mcp] tools/list: remote response shape: ${shape}\n`,
         );
       }
       if (remote && Array.isArray(remote.tools)) {
         if (debug) {
           process.stderr.write(
-            `[@agentmemory/mcp] tools/list: returning ${remote.tools.length} tools from server\n`,
+            `[@idunafu/agentmemory-ja-mcp] tools/list: returning ${remote.tools.length} tools from server\n`,
           );
         }
         return { tools: remote.tools };
       }
       process.stderr.write(
-        `[@agentmemory/mcp] tools/list: server returned unexpected shape (no .tools array); falling back to local IMPLEMENTED_TOOLS list. Set AGENTMEMORY_DEBUG=1 to inspect response.\n`,
+        `[@idunafu/agentmemory-ja-mcp] tools/list: server returned unexpected shape (no .tools array); falling back to local IMPLEMENTED_TOOLS list. Set AGENTMEMORY_DEBUG=1 to inspect response.\n`,
       );
     } catch (err) {
       process.stderr.write(
-        `[@agentmemory/mcp] tools/list proxy failed: ${err instanceof Error ? err.message : String(err)}; falling back to local list\n`,
+        `[@idunafu/agentmemory-ja-mcp] tools/list proxy failed: ${err instanceof Error ? err.message : String(err)}; falling back to local list\n`,
       );
       invalidateHandle();
     }
@@ -438,7 +438,7 @@ export async function handleToolsList(): Promise<{ tools: unknown[] }> {
   const fallback = getAllTools().filter((t) => IMPLEMENTED_TOOLS.has(t.name));
   if (debug) {
     process.stderr.write(
-      `[@agentmemory/mcp] tools/list: returning ${fallback.length} local fallback tools (${fallback.map((t) => t.name).join(",")})\n`,
+      `[@idunafu/agentmemory-ja-mcp] tools/list: returning ${fallback.length} local fallback tools (${fallback.map((t) => t.name).join(",")})\n`,
     );
   }
   return { tools: fallback };
@@ -486,7 +486,7 @@ const transport = createStdioTransport(async (method, params) => {
 });
 
 process.stderr.write(
-  `[@agentmemory/mcp] Standalone MCP server v${SERVER_INFO.version} starting...\n`,
+  `[@idunafu/agentmemory-ja-mcp] Standalone MCP server v${SERVER_INFO.version} starting...\n`,
 );
 transport.start();
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import("@agentmemory/agentmemory/dist/standalone.mjs").catch((err) => {
+import("@idunafu/agentmemory-ja/dist/standalone.mjs").catch((err) => {
   console.error(
-    "[@agentmemory/mcp] Failed to load standalone entrypoint from @agentmemory/agentmemory.",
+    "[@idunafu/agentmemory-ja-mcp] Failed to load standalone entrypoint from @idunafu/agentmemory-ja.",
   );
   console.error(
-    "[@agentmemory/mcp] Try installing manually: npm i -g @agentmemory/agentmemory",
+    "[@idunafu/agentmemory-ja-mcp] Try installing manually: npm i -g @idunafu/agentmemory-ja",
   );
   console.error(err instanceof Error ? err.stack || err.message : String(err));
   process.exit(1);

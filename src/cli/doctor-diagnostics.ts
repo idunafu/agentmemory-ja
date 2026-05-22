@@ -12,9 +12,9 @@
 // outcome before moving on.
 //
 // Doctor v2 surface:
-//   agentmemory doctor             # interactive: Fix/Skip/More/Quit per failed check
-//   agentmemory doctor --all       # apply every available fix without prompting (CI)
-//   agentmemory doctor --dry-run   # show what each fix WOULD do; execute nothing
+//   agentmemory-ja doctor             # interactive: Fix/Skip/More/Quit per failed check
+//   agentmemory-ja doctor --all       # apply every available fix without prompting (CI)
+//   agentmemory-ja doctor --dry-run   # show what each fix WOULD do; execute nothing
 
 export type DiagnosticStatus = {
   ok: boolean;

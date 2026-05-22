@@ -1,49 +1,29 @@
-# @agentmemory/mcp
+# @idunafu/agentmemory-ja-mcp
 
-Standalone MCP server for [agentmemory](https://github.com/rohitg00/agentmemory).
+Standalone MCP server shim for [agentmemory-ja](https://github.com/idunafu/agentmemory-ja).
 
-This is a thin shim package that re-exposes the standalone MCP entrypoint from
-[`@agentmemory/agentmemory`](https://www.npmjs.com/package/@agentmemory/agentmemory),
-so MCP client configs that say `npx @agentmemory/mcp` work out of the box
-without installing the full package first.
-
-## Usage
+For local fork usage, prefer the main package binary so it cannot resolve to the
+upstream npm package by accident:
 
 ```bash
-npx -y @agentmemory/mcp
+agentmemory-ja mcp
 ```
 
-Or wire it into your MCP client (Claude Desktop, OpenClaw, Cursor, Codex, etc.):
+MCP client config:
 
 ```json
 {
   "mcpServers": {
     "agentmemory": {
-      "command": "npx",
-      "args": ["-y", "@agentmemory/mcp"]
+      "command": "agentmemory-ja",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-This package depends on `@agentmemory/agentmemory` and forwards to its
-`dist/standalone.mjs` entrypoint. If you already have `@agentmemory/agentmemory`
-installed, you can call the same entrypoint directly:
-
-```bash
-npx @agentmemory/agentmemory mcp
-```
-
-Both commands do the same thing.
-
-## Why does this package exist?
-
-The original plan in [issue #120](https://github.com/rohitg00/agentmemory/issues/120)
-was to publish `agentmemory-mcp` as an unscoped package, but npm's name-similarity
-policy blocks that name because of an unrelated package called `agent-memory-mcp`.
-Publishing under the `@agentmemory` scope sidesteps the conflict and keeps the
-"dedicated standalone package" UX — `npx @agentmemory/mcp` is one character
-longer than `npx agentmemory-mcp` and works on the live registry.
+If this shim package is published, it forwards to
+`@idunafu/agentmemory-ja/dist/standalone.mjs`.
 
 ## License
 
