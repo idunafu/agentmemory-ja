@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 
-vi.mock("@xenova/transformers", () => {
+vi.mock("@huggingface/transformers", () => {
   throw new Error("not installed");
 });
 
 import { rerank, isRerankerAvailable } from "../src/state/reranker.js";
 
 describe("reranker", () => {
-  it("returns results unchanged when @xenova/transformers is unavailable", async () => {
+  it("returns results unchanged when @huggingface/transformers is unavailable", async () => {
     const results = [
       {
         observation: {

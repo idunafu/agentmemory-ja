@@ -4,8 +4,23 @@ import {
   withDimensionGuard,
 } from "../src/providers/embedding/index.js";
 import { GeminiEmbeddingProvider } from "../src/providers/embedding/gemini.js";
+import { LocalEmbeddingProvider } from "../src/providers/embedding/local.js";
 import { OpenAIEmbeddingProvider } from "../src/providers/embedding/openai.js";
 import type { EmbeddingProvider } from "../src/types.js";
+
+const { mockExtractor, mockPipeline } = vi.hoisted(() => {
+  const extractor = vi.fn(async () => ({
+    tolist: () => [[0.1, 0.2, 0.3, 0.4]],
+  }));
+  return {
+    mockExtractor: extractor,
+    mockPipeline: vi.fn(async () => extractor),
+  };
+});
+
+vi.mock("@huggingface/transformers", () => ({
+  pipeline: mockPipeline,
+}));
 
 describe("createEmbeddingProvider", () => {
   const originalEnv = { ...process.env };
@@ -18,6 +33,10 @@ describe("createEmbeddingProvider", () => {
     delete process.env["COHERE_API_KEY"];
     delete process.env["OPENROUTER_API_KEY"];
     delete process.env["EMBEDDING_PROVIDER"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"];
+    mockPipeline.mockClear();
+    mockExtractor.mockClear();
   });
 
   afterEach(() => {
@@ -49,6 +68,81 @@ describe("createEmbeddingProvider", () => {
     process.env["EMBEDDING_PROVIDER"] = "openai";
     const provider = createEmbeddingProvider();
     expect(provider).toBeInstanceOf(OpenAIEmbeddingProvider);
+  });
+
+  it("returns LocalEmbeddingProvider when EMBEDDING_PROVIDER=local", () => {
+    process.env["EMBEDDING_PROVIDER"] = "local";
+    const provider = createEmbeddingProvider();
+    expect(provider).toBeInstanceOf(LocalEmbeddingProvider);
+    expect(provider!.name).toBe("local");
+  });
+});
+
+describe("LocalEmbeddingProvider", () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"];
+    mockPipeline.mockClear();
+    mockExtractor.mockClear();
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("uses the default local embedding model and dimensions", async () => {
+    const provider = new LocalEmbeddingProvider();
+    expect(provider.dimensions).toBe(384);
+
+    await provider.embed("hello");
+
+    expect(mockPipeline).toHaveBeenCalledWith(
+      "feature-extraction",
+      "Xenova/all-MiniLM-L6-v2",
+    );
+    expect(mockExtractor).toHaveBeenCalledWith(["hello"], {
+      pooling: "mean",
+      normalize: true,
+    });
+  });
+
+  it("passes AGENTMEMORY_LOCAL_EMBEDDING_MODEL to Transformers.js", async () => {
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"] =
+      "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
+    const provider = new LocalEmbeddingProvider();
+
+    await provider.embed("こんにちは");
+
+    expect(mockPipeline).toHaveBeenCalledWith(
+      "feature-extraction",
+      "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+    );
+  });
+
+  it("uses AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS when set", () => {
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"] = "768";
+    const provider = new LocalEmbeddingProvider();
+    expect(provider.dimensions).toBe(768);
+  });
+
+  it("rejects invalid AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS values", () => {
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"] = "not-a-number";
+    expect(() => new LocalEmbeddingProvider()).toThrow(
+      /AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS must be a positive integer/,
+    );
+
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"] = "-5";
+    expect(() => new LocalEmbeddingProvider()).toThrow(
+      /AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS must be a positive integer/,
+    );
+
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"] = "0";
+    expect(() => new LocalEmbeddingProvider()).toThrow(
+      /AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS must be a positive integer/,
+    );
   });
 });
 

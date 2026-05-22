@@ -56,10 +56,10 @@ export class ClipEmbeddingProvider implements EmbeddingProvider {
   private async getTransformers(): Promise<TransformersModule> {
     if (this.transformers) return this.transformers;
     try {
-      this.transformers = (await import("@xenova/transformers")) as unknown as TransformersModule;
+      this.transformers = (await import("@huggingface/transformers")) as unknown as TransformersModule;
     } catch {
       throw new Error(
-        "Install @xenova/transformers for CLIP image embeddings: npm install @xenova/transformers",
+        "Install @huggingface/transformers for CLIP image embeddings: npm install @huggingface/transformers",
       );
     }
     return this.transformers;

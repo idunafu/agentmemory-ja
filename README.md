@@ -242,7 +242,7 @@ npx @agentmemory/agentmemory
 </tr>
 </table>
 
-> Embedding model: `all-MiniLM-L6-v2` (local, free, no API key). Full reports: [`benchmark/LONGMEMEVAL.md`](benchmark/LONGMEMEVAL.md), [`benchmark/QUALITY.md`](benchmark/QUALITY.md), [`benchmark/SCALE.md`](benchmark/SCALE.md). Competitor comparison: [`benchmark/COMPARISON.md`](benchmark/COMPARISON.md) — agentmemory vs mem0, Letta, Khoj, claude-mem, Hippo.
+> Embedding model: `all-MiniLM-L6-v2` (local, free, no API key). Set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL` to swap in another Transformers.js-compatible local model. Full reports: [`benchmark/LONGMEMEVAL.md`](benchmark/LONGMEMEVAL.md), [`benchmark/QUALITY.md`](benchmark/QUALITY.md), [`benchmark/SCALE.md`](benchmark/SCALE.md). Competitor comparison: [`benchmark/COMPARISON.md`](benchmark/COMPARISON.md) — agentmemory vs mem0, Letta, Khoj, claude-mem, Hippo.
 
 **Reproduce locally:** [`eval/README.md`](eval/README.md) — adapter-pluggable harness for LongMemEval `_s` (public 500-Q) + `coding-agent-life-v1` (in-house 15-session corpus). Grep / vector / agentmemory adapters score side-by-side, NDJSON output, published scorecards land in [`docs/benchmarks/`](docs/benchmarks/).
 
@@ -789,17 +789,21 @@ BM25 tokenizes Greek, Cyrillic, Hebrew, Arabic, and accented Latin out of the bo
 agentmemory auto-detects your provider. For best results, install local embeddings (free):
 
 ```bash
-npm install @xenova/transformers
+npm install @huggingface/transformers
 ```
 
 | Provider | Model | Cost | Notes |
 |---|---|---|---|
-| **Local (recommended)** | `all-MiniLM-L6-v2` | Free | Offline, +8pp recall over BM25-only |
+| **Local (recommended)** | `all-MiniLM-L6-v2` by default; `paraphrase-multilingual-MiniLM-L12-v2` for Japanese / multilingual recall | Free | Offline, +8pp recall over BM25-only; set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL` + `AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS` to swap models |
 | Gemini | `gemini-embedding-001` | Free tier | 100+ languages, 768/1536/3072 dims (MRL), 2048-token input. Replaces `text-embedding-004` ([deprecated, shutdown Jan 14, 2026](https://ai.google.dev/gemini-api/docs/deprecations)) |
 | OpenAI | `text-embedding-3-small` | $0.02/1M | Highest quality |
 | Voyage AI | `voyage-code-3` | Paid | Optimized for code |
 | Cohere | `embed-english-v3.0` | Free trial | General purpose |
 | OpenRouter | Any model | Varies | Multi-model proxy |
+
+Transformers.js used to be published as `@xenova/transformers`; the official package is now `@huggingface/transformers`, and the current Transformers.js docs use that import. The `Xenova/...` model IDs still work: they are Hugging Face model repos with ONNX weights prepared for Transformers.js.
+
+For Japanese or multilingual recall, keep `EMBEDDING_PROVIDER=local` and set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/paraphrase-multilingual-MiniLM-L12-v2` with `AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=384`. If you switch to a model with different dimensions, set `AGENTMEMORY_DROP_STALE_INDEX=true` for the first restart so the persisted vector index is rebuilt, then remove it.
 
 ---
 
@@ -1144,6 +1148,10 @@ Create `~/.agentmemory/.env`:
 
 # Embedding provider (auto-detected, or override)
 # EMBEDDING_PROVIDER=local
+# AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2
+# AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/paraphrase-multilingual-MiniLM-L12-v2  # Japanese / multilingual
+# AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=384
+# AGENTMEMORY_DROP_STALE_INDEX=true  # Set once after changing embedding dimensions, then remove
 # VOYAGE_API_KEY=...
 # OPENAI_API_KEY=sk-...
 # OPENAI_BASE_URL=https://api.openai.com   # Override for Azure / vLLM / LM Studio / proxies
