@@ -805,6 +805,8 @@ Transformers.js used to be published as `@xenova/transformers`; the official pac
 
 For Japanese or multilingual recall, keep `EMBEDDING_PROVIDER=local` and set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/paraphrase-multilingual-MiniLM-L12-v2` with `AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=384`. If you switch to a model with different dimensions, set `AGENTMEMORY_DROP_STALE_INDEX=true` for the first restart so the persisted vector index is rebuilt, then remove it.
 
+Optional local re-ranking is enabled with `RERANK_ENABLED=true`. The default reranker is `hotchpotch/japanese-reranker-xsmall-v2`, using `onnx/model_qint8_avx2.onnx` from that repo. On Zen 4+ CPUs with AVX512-VNNI, set `AGENTMEMORY_RERANKER_MODEL_FILE=model_qint8_avx512_vnni.onnx`; on arm64, set `AGENTMEMORY_RERANKER_MODEL_FILE=model_qint8_arm64.onnx`. Transformers.js passes this to ONNX Runtime; whether the extension-specific kernels are actually used depends on ONNX Runtime and the host CPU. Do not set `AGENTMEMORY_RERANKER_DTYPE` when selecting an exact ONNX file unless you intentionally need a Transformers.js dtype override.
+
 ---
 
 <h2 id="mcp-server"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/tags/light/section-mcp.svg"><img src="assets/tags/section-mcp.svg" alt="MCP Server" height="32" /></picture></h2>
@@ -1152,6 +1154,11 @@ Create `~/.agentmemory/.env`:
 # AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/paraphrase-multilingual-MiniLM-L12-v2  # Japanese / multilingual
 # AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=384
 # AGENTMEMORY_DROP_STALE_INDEX=true  # Set once after changing embedding dimensions, then remove
+# RERANK_ENABLED=true
+# AGENTMEMORY_RERANKER_MODEL=hotchpotch/japanese-reranker-xsmall-v2
+# AGENTMEMORY_RERANKER_MODEL_FILE=model_qint8_avx2.onnx
+# AGENTMEMORY_RERANKER_MODEL_FILE=model_qint8_avx512_vnni.onnx  # Zen 4+ / AVX512-VNNI
+# AGENTMEMORY_RERANKER_MODEL_FILE=model_qint8_arm64.onnx        # arm64
 # VOYAGE_API_KEY=...
 # OPENAI_API_KEY=sk-...
 # OPENAI_BASE_URL=https://api.openai.com   # Override for Azure / vLLM / LM Studio / proxies

@@ -4,4 +4,18 @@ declare module "@huggingface/transformers" {
     model: string,
     options?: Record<string, unknown>,
   ): Promise<any>;
+
+  export const AutoTokenizer: {
+    from_pretrained(
+      model: string,
+      options?: Record<string, unknown>,
+    ): Promise<any>;
+  };
+
+  export const AutoModelForSequenceClassification: {
+    from_pretrained(
+      model: string,
+      options?: Record<string, unknown>,
+    ): Promise<any>;
+  };
 }
