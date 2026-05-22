@@ -105,7 +105,19 @@ function extractRerankScores(logits: any, expectedCount: number): number[] {
 }
 
 function passageText(result: HybridSearchResult): string {
-  return [result.observation.title, result.observation.narrative]
+  const obs = result.observation;
+  const facts = Array.isArray(obs.facts) ? obs.facts : [];
+  const concepts = Array.isArray(obs.concepts) ? obs.concepts : [];
+  const files = Array.isArray(obs.files) ? obs.files : [];
+  return [
+    obs.title,
+    obs.subtitle,
+    ...facts,
+    obs.narrative,
+    ...concepts,
+    ...files,
+    obs.type,
+  ]
     .filter(Boolean)
     .join("\n");
 }

@@ -155,6 +155,44 @@ describe("SearchIndex", () => {
     expect(results[0].obsId).toBe("obs_mixed");
   });
 
+  it("normalizes Unicode width and composed characters before searching", () => {
+    index.add(
+      makeObs({
+        id: "obs_nfkc",
+        title: "API設定",
+        narrative: "OAuthログインの設定を更新しました",
+        concepts: ["ＡＰＩ", "ガード"],
+      }),
+    );
+
+    expect(index.search("api設定")[0].obsId).toBe("obs_nfkc");
+    expect(index.search("ガード")[0].obsId).toBe("obs_nfkc");
+  });
+
+  it("expands Japanese and English development synonyms", () => {
+    index.add(
+      makeObs({
+        id: "obs_auth",
+        title: "auth middleware",
+        narrative: "Added authentication checks for login sessions",
+        concepts: ["auth"],
+      }),
+    );
+    index.add(
+      makeObs({
+        id: "obs_config",
+        title: "設定ファイル",
+        narrative: "環境設定を更新しました",
+        concepts: ["設定"],
+      }),
+    );
+
+    expect(index.search("認証").some((r) => r.obsId === "obs_auth")).toBe(true);
+    expect(index.search("config").some((r) => r.obsId === "obs_config")).toBe(
+      true,
+    );
+  });
+
   it("segments Chinese (Han) text into words", () => {
     index.add(
       makeObs({

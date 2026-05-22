@@ -35,6 +35,8 @@ describe("createEmbeddingProvider", () => {
     delete process.env["EMBEDDING_PROVIDER"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DOCUMENT_PREFIX"];
     mockPipeline.mockClear();
     mockExtractor.mockClear();
   });
@@ -85,6 +87,8 @@ describe("LocalEmbeddingProvider", () => {
     process.env = { ...originalEnv };
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"];
     delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX"];
+    delete process.env["AGENTMEMORY_LOCAL_EMBEDDING_DOCUMENT_PREFIX"];
     mockPipeline.mockClear();
     mockExtractor.mockClear();
   });
@@ -95,13 +99,13 @@ describe("LocalEmbeddingProvider", () => {
 
   it("uses the default local embedding model and dimensions", async () => {
     const provider = new LocalEmbeddingProvider();
-    expect(provider.dimensions).toBe(384);
+    expect(provider.dimensions).toBe(768);
 
     await provider.embed("hello");
 
     expect(mockPipeline).toHaveBeenCalledWith(
       "feature-extraction",
-      "Xenova/all-MiniLM-L6-v2",
+      "cl-nagoya/ruri-v3-310m",
     );
     expect(mockExtractor).toHaveBeenCalledWith(["hello"], {
       pooling: "mean",
@@ -120,6 +124,63 @@ describe("LocalEmbeddingProvider", () => {
       "feature-extraction",
       "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
     );
+  });
+
+  it("applies ruri-v3 query and document prefixes without normalizing input", async () => {
+    const provider = new LocalEmbeddingProvider();
+
+    await provider.embedQuery!("ＡＰＩの実装");
+    await provider.embedDocuments!(["ガードでJWTを検証する"]);
+
+    expect(mockExtractor).toHaveBeenNthCalledWith(1, ["検索クエリ: ＡＰＩの実装"], {
+      pooling: "mean",
+      normalize: true,
+    });
+    expect(mockExtractor).toHaveBeenNthCalledWith(
+      2,
+      ["検索文書: ガードでJWTを検証する"],
+      {
+        pooling: "mean",
+        normalize: true,
+      },
+    );
+  });
+
+  it("allows local embedding prefixes to be overridden or cleared", async () => {
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX"] = "query: ";
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DOCUMENT_PREFIX"] = "";
+    const provider = new LocalEmbeddingProvider();
+
+    await provider.embedQuery!("認証");
+    await provider.embedDocuments!(["文書"]);
+
+    expect(mockExtractor).toHaveBeenNthCalledWith(1, ["query: 認証"], {
+      pooling: "mean",
+      normalize: true,
+    });
+    expect(mockExtractor).toHaveBeenNthCalledWith(2, ["文書"], {
+      pooling: "mean",
+      normalize: true,
+    });
+  });
+
+  it("does not add prefixes by default for non-ruri local models", async () => {
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_MODEL"] =
+      "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
+    process.env["AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"] = "384";
+    const provider = new LocalEmbeddingProvider();
+
+    await provider.embedQuery!("認証");
+    await provider.embedDocuments!(["文書"]);
+
+    expect(mockExtractor).toHaveBeenNthCalledWith(1, ["認証"], {
+      pooling: "mean",
+      normalize: true,
+    });
+    expect(mockExtractor).toHaveBeenNthCalledWith(2, ["文書"], {
+      pooling: "mean",
+      normalize: true,
+    });
   });
 
   it("uses AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS when set", () => {

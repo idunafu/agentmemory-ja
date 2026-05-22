@@ -2,6 +2,7 @@ import type { CompressedObservation } from "../types.js";
 import { stem } from "./stemmer.js";
 import { getSynonyms } from "./synonyms.js";
 import { segmentCjk, hasCjk } from "./cjk-segmenter.js";
+import { normalizeSearchText } from "../utils/text.js";
 
 interface IndexEntry {
   obsId: string;
@@ -55,7 +56,7 @@ export class SearchIndex {
     query: string,
     limit = 20,
   ): Array<{ obsId: string; sessionId: string; score: number }> {
-    const rawTerms = this.tokenize(query.toLowerCase());
+    const rawTerms = this.tokenize(normalizeSearchText(query).toLowerCase());
     if (rawTerms.length === 0) return [];
 
     const N = this.entries.size;
@@ -219,11 +220,11 @@ export class SearchIndex {
       ...obs.files,
       obs.type,
     ];
-    return this.tokenize(parts.join(" ").toLowerCase());
+    return this.tokenize(normalizeSearchText(parts.join(" ")).toLowerCase());
   }
 
   private tokenize(text: string): string[] {
-    const cleaned = text.replace(/[^\p{L}\p{N}\s/.\\-_]/gu, " ");
+    const cleaned = normalizeSearchText(text).replace(/[^\p{L}\p{N}\s/.\\-_]/gu, " ");
     const out: string[] = [];
     for (const raw of cleaned.split(/\s+/)) {
       if (raw.length < 2) continue;

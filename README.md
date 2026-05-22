@@ -242,7 +242,7 @@ npx @agentmemory/agentmemory
 </tr>
 </table>
 
-> Embedding model: `all-MiniLM-L6-v2` (local, free, no API key). Set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL` to swap in another Transformers.js-compatible local model. Full reports: [`benchmark/LONGMEMEVAL.md`](benchmark/LONGMEMEVAL.md), [`benchmark/QUALITY.md`](benchmark/QUALITY.md), [`benchmark/SCALE.md`](benchmark/SCALE.md). Competitor comparison: [`benchmark/COMPARISON.md`](benchmark/COMPARISON.md) — agentmemory vs mem0, Letta, Khoj, claude-mem, Hippo.
+> Embedding model: `cl-nagoya/ruri-v3-310m` (local, free, no API key). Set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL` to swap in another Transformers.js-compatible local model. Full reports: [`benchmark/LONGMEMEVAL.md`](benchmark/LONGMEMEVAL.md), [`benchmark/QUALITY.md`](benchmark/QUALITY.md), [`benchmark/SCALE.md`](benchmark/SCALE.md). Competitor comparison: [`benchmark/COMPARISON.md`](benchmark/COMPARISON.md) — agentmemory vs mem0, Letta, Khoj, claude-mem, Hippo.
 
 **Reproduce locally:** [`eval/README.md`](eval/README.md) — adapter-pluggable harness for LongMemEval `_s` (public 500-Q) + `coding-agent-life-v1` (in-house 15-session corpus). Grep / vector / agentmemory adapters score side-by-side, NDJSON output, published scorecards land in [`docs/benchmarks/`](docs/benchmarks/).
 
@@ -794,7 +794,7 @@ npm install @huggingface/transformers
 
 | Provider | Model | Cost | Notes |
 |---|---|---|---|
-| **Local (recommended)** | `all-MiniLM-L6-v2` by default; `paraphrase-multilingual-MiniLM-L12-v2` for Japanese / multilingual recall | Free | Offline, +8pp recall over BM25-only; set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL` + `AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS` to swap models |
+| **Local (recommended)** | `cl-nagoya/ruri-v3-310m` by default; `Xenova/paraphrase-multilingual-MiniLM-L12-v2` for a smaller 384-dim fallback | Free | Offline, Japanese-first recall; set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL` + `AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS` to swap models |
 | Gemini | `gemini-embedding-001` | Free tier | 100+ languages, 768/1536/3072 dims (MRL), 2048-token input. Replaces `text-embedding-004` ([deprecated, shutdown Jan 14, 2026](https://ai.google.dev/gemini-api/docs/deprecations)) |
 | OpenAI | `text-embedding-3-small` | $0.02/1M | Highest quality |
 | Voyage AI | `voyage-code-3` | Paid | Optimized for code |
@@ -803,7 +803,7 @@ npm install @huggingface/transformers
 
 Transformers.js used to be published as `@xenova/transformers`; the official package is now `@huggingface/transformers`, and the current Transformers.js docs use that import. The `Xenova/...` model IDs still work: they are Hugging Face model repos with ONNX weights prepared for Transformers.js.
 
-For Japanese or multilingual recall, keep `EMBEDDING_PROVIDER=local` and set `AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/paraphrase-multilingual-MiniLM-L12-v2` with `AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=384`. If you switch to a model with different dimensions, set `AGENTMEMORY_DROP_STALE_INDEX=true` for the first restart so the persisted vector index is rebuilt, then remove it.
+For Japanese-first recall, keep `EMBEDDING_PROVIDER=local` and use the default `AGENTMEMORY_LOCAL_EMBEDDING_MODEL=cl-nagoya/ruri-v3-310m` with `AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=768`. Ruri v3 uses query/document prefixes; agentmemory applies `検索クエリ: ` for query embeddings and `検索文書: ` for document embeddings automatically for `ruri-v3-*` models. If you switch dimensions, set `AGENTMEMORY_DROP_STALE_INDEX=true` for the first restart so the persisted vector index is rebuilt, then remove it.
 
 Optional local re-ranking is enabled with `RERANK_ENABLED=true`. The default reranker is `hotchpotch/japanese-reranker-xsmall-v2`, using `onnx/model_qint8_avx2.onnx` from that repo. On Zen 4+ CPUs with AVX512-VNNI, set `AGENTMEMORY_RERANKER_MODEL_FILE=model_qint8_avx512_vnni.onnx`; on arm64, set `AGENTMEMORY_RERANKER_MODEL_FILE=model_qint8_arm64.onnx`. Transformers.js passes this to ONNX Runtime; whether the extension-specific kernels are actually used depends on ONNX Runtime and the host CPU. Do not set `AGENTMEMORY_RERANKER_DTYPE` when selecting an exact ONNX file unless you intentionally need a Transformers.js dtype override.
 
@@ -1150,9 +1150,11 @@ Create `~/.agentmemory/.env`:
 
 # Embedding provider (auto-detected, or override)
 # EMBEDDING_PROVIDER=local
-# AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2
-# AGENTMEMORY_LOCAL_EMBEDDING_MODEL=Xenova/paraphrase-multilingual-MiniLM-L12-v2  # Japanese / multilingual
-# AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=384
+# AGENTMEMORY_LOCAL_EMBEDDING_MODEL=cl-nagoya/ruri-v3-310m
+# AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS=768
+# AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX="検索クエリ: "
+# AGENTMEMORY_LOCAL_EMBEDDING_DOCUMENT_PREFIX="検索文書: "
+# AGENTMEMORY_MEMORY_LANGUAGE=auto
 # AGENTMEMORY_DROP_STALE_INDEX=true  # Set once after changing embedding dimensions, then remove
 # RERANK_ENABLED=true
 # AGENTMEMORY_RERANKER_MODEL=hotchpotch/japanese-reranker-xsmall-v2

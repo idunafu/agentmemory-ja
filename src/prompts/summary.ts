@@ -1,3 +1,5 @@
+import { memoryLanguagePolicy } from "./language-policy.js";
+
 export const SUMMARY_SYSTEM = `You are a session summarizer for an AI coding agent's memory system. Given all compressed observations from a coding session, produce a concise session summary.
 
 Output EXACTLY this XML format with no additional text:
@@ -20,7 +22,8 @@ Rules:
 - Focus on outcomes, not individual tool calls
 - Highlight decisions and their rationale
 - List all files that were created or modified
-- Concepts should be searchable terms for future context retrieval`
+- Concepts should be searchable terms for future context retrieval
+- ${memoryLanguagePolicy()}`
 
 export function buildSummaryPrompt(observations: Array<{
   type: string
@@ -59,7 +62,8 @@ Rules:
 - Synthesize a single narrative that reflects the whole arc, not a chunk-by-chunk recap
 - Preserve every distinct decision across chunks
 - Union (deduplicate) all files and concepts
-- Title should capture the session's overall outcome`
+- Title should capture the session's overall outcome
+- ${memoryLanguagePolicy()}`
 
 export function buildReducePrompt(partials: Array<{
   title: string

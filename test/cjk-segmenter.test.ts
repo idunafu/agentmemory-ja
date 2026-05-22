@@ -49,7 +49,7 @@ describe("CJK segmenter", () => {
 
     const { segmentCjk } = await loadSegmenter();
 
-    expect(segmentCjk("项目记忆")).toEqual(["项目", "记忆"]);
+    expect(segmentCjk("项目记忆")).toEqual(["项目记忆", "项目", "记忆"]);
     expect(cut).toHaveBeenCalledWith("项目记忆", true);
   });
 

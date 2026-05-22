@@ -1,3 +1,5 @@
+import { memoryLanguagePolicy } from "./language-policy.js";
+
 export const COMPRESSION_SYSTEM = `You are a memory compression engine for an AI coding agent. Your job is to extract the essential information from a tool usage observation and compress it into structured data.
 
 Output EXACTLY this XML format with no additional text:
@@ -25,6 +27,7 @@ Rules:
 - File paths must be exact
 - Importance: 1-3 for routine reads, 4-6 for edits/commands, 7-9 for architectural decisions, 10 for breaking changes
 - Concepts should be reusable search terms (e.g., "React hooks", "SQL migration", "auth middleware")
+- ${memoryLanguagePolicy()}
 - Strip any secrets, tokens, or credentials from the output`;
 
 export function buildCompressionPrompt(observation: {

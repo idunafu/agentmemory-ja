@@ -236,6 +236,8 @@ export interface EmbeddingProvider {
   dimensions: number;
   embed(text: string): Promise<Float32Array>;
   embedBatch(texts: string[]): Promise<Float32Array[]>;
+  embedQuery?(text: string): Promise<Float32Array>;
+  embedDocuments?(texts: string[]): Promise<Float32Array[]>;
   embedImage?(src: string): Promise<Float32Array>;
 }
 

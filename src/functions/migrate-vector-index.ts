@@ -63,7 +63,9 @@ export async function migrateVectorIndex(
     const texts = textMems.map((m) => m.title + " " + m.content);
 
     if (texts.length > 0) {
-      const embeddings = await newProvider.embedBatch(texts);
+      const embeddings = newProvider.embedDocuments
+        ? await newProvider.embedDocuments(texts)
+        : await newProvider.embedBatch(texts);
       for (let i = 0; i < textMems.length; i++) {
         if (!isValidEmbedding(embeddings[i], newProvider, { kind: "memory", id: textMems[i].id })) {
           failed++;
@@ -123,7 +125,9 @@ export async function migrateVectorIndex(
       const texts = textObs.map((o) => o.title + " " + (o.narrative || ""));
       if (texts.length === 0) continue;
 
-      const embeddings = await newProvider.embedBatch(texts);
+      const embeddings = newProvider.embedDocuments
+        ? await newProvider.embedDocuments(texts)
+        : await newProvider.embedBatch(texts);
       for (let i = 0; i < textObs.length; i++) {
         if (!isValidEmbedding(embeddings[i], newProvider, { kind: "observation", id: textObs[i].id })) {
           failed++;

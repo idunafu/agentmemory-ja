@@ -11,8 +11,10 @@ type Pipeline = (
   ) => Promise<{ tolist: () => number[][] }>
 >;
 
-const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
-const DEFAULT_DIMENSIONS = 384;
+const DEFAULT_MODEL = "cl-nagoya/ruri-v3-310m";
+const DEFAULT_DIMENSIONS = 768;
+const RURI_QUERY_PREFIX = "検索クエリ: ";
+const RURI_DOCUMENT_PREFIX = "検索文書: ";
 
 function resolveDimensions(value: string | undefined): number {
   if (!value) return DEFAULT_DIMENSIONS;
@@ -29,6 +31,8 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
   readonly name = "local";
   readonly dimensions: number;
   private readonly model: string;
+  private readonly queryPrefix: string;
+  private readonly documentPrefix: string;
   private extractor: Awaited<ReturnType<Pipeline>> | null = null;
 
   constructor() {
@@ -36,6 +40,13 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
     this.dimensions = resolveDimensions(
       getEnvVar("AGENTMEMORY_LOCAL_EMBEDDING_DIMENSIONS"),
     );
+    const isRuri = /(^|\/)ruri-v3-/i.test(this.model);
+    this.queryPrefix =
+      getEnvVar("AGENTMEMORY_LOCAL_EMBEDDING_QUERY_PREFIX") ??
+      (isRuri ? RURI_QUERY_PREFIX : "");
+    this.documentPrefix =
+      getEnvVar("AGENTMEMORY_LOCAL_EMBEDDING_DOCUMENT_PREFIX") ??
+      (isRuri ? RURI_DOCUMENT_PREFIX : "");
   }
 
   async embed(text: string): Promise<Float32Array> {
@@ -44,6 +55,21 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
   }
 
   async embedBatch(texts: string[]): Promise<Float32Array[]> {
+    return this.embedRaw(texts);
+  }
+
+  async embedQuery(text: string): Promise<Float32Array> {
+    const [result] = await this.embedRaw([this.queryPrefix + text]);
+    return result;
+  }
+
+  async embedDocuments(texts: string[]): Promise<Float32Array[]> {
+    return this.embedRaw(
+      texts.map((text) => this.documentPrefix + text),
+    );
+  }
+
+  private async embedRaw(texts: string[]): Promise<Float32Array[]> {
     const extractor = await this.getExtractor();
     const output = await extractor(texts, {
       pooling: "mean",

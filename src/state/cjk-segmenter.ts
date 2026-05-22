@@ -101,7 +101,8 @@ function segmentHan(text: string): string[] {
   const j = getJieba();
   if (!j) return [text];
   try {
-    return cleanTokens(j.cut(text, true));
+    const tokens = cleanTokens(j.cut(text, true));
+    return tokens.includes(text) ? tokens : [text, ...tokens];
   } catch {
     return [text];
   }

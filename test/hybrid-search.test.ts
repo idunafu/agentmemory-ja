@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { HybridSearch } from "../src/state/hybrid-search.js";
 import { SearchIndex } from "../src/state/search-index.js";
+import { VectorIndex } from "../src/state/vector-index.js";
 import type { CompressedObservation, EmbeddingProvider } from "../src/types.js";
 
 function makeObs(
@@ -179,5 +180,32 @@ describe("HybridSearch", () => {
     expect(results[0].observation.id).toBe("mem_abc");
     expect(results[0].observation.narrative).toBe("Test memory for search");
     expect(results[0].observation.concepts).toEqual(["test", "search"]);
+  });
+
+  it("uses embedQuery for vector query embeddings when provided", async () => {
+    const obs = makeObs({
+      id: "obs_vector",
+      sessionId: "ses_1",
+      title: "unrelated title",
+      narrative: "vector-only match",
+    });
+    await kv.set("mem:obs:ses_1", "obs_vector", obs);
+
+    const vector = new VectorIndex();
+    vector.add("obs_vector", "ses_1", new Float32Array([1, 0]));
+    const provider: EmbeddingProvider = {
+      name: "fake",
+      dimensions: 2,
+      embed: async () => new Float32Array([0, 1]),
+      embedBatch: async () => [new Float32Array([0, 1])],
+      embedQuery: async () => new Float32Array([1, 0]),
+    };
+
+    const hybrid = new HybridSearch(bm25, vector, provider, kv as never);
+    const results = await hybrid.search("日本語の問い合わせ");
+
+    expect(results.length).toBe(1);
+    expect(results[0].observation.id).toBe("obs_vector");
+    expect(results[0].vectorScore).toBe(1);
   });
 });

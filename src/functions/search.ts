@@ -8,6 +8,7 @@ import type { EmbeddingProvider } from '../types.js'
 import { memoryToObservation } from '../state/memory-utils.js'
 import { recordAccessBatch } from './access-tracker.js'
 import { logger } from "../logger.js";
+import { estimateJsonTokens } from "../utils/text.js";
 
 let index: SearchIndex | null = null
 let vectorIndex: VectorIndex | null = null
@@ -62,7 +63,10 @@ export async function vectorIndexAddGuarded(
   const ep = currentEmbeddingProvider
   if (!vi || !ep) return false
   try {
-    const embedding = await ep.embed(clipEmbedInput(text))
+    const input = clipEmbedInput(text)
+    const embedding = ep.embedDocuments
+      ? (await ep.embedDocuments([input]))[0]
+      : await ep.embed(input)
     if (embedding.length !== ep.dimensions) {
       logger.warn("vector-index add: dimension mismatch — skipping", {
         kind: context.kind,
@@ -110,7 +114,10 @@ export async function vectorIndexAddBatchGuarded(
 
   let embeddings: Float32Array[]
   try {
-    embeddings = await ep.embedBatch(items.map((i) => clipEmbedInput(i.text)))
+    const inputs = items.map((i) => clipEmbedInput(i.text))
+    embeddings = ep.embedDocuments
+      ? await ep.embedDocuments(inputs)
+      : await ep.embedBatch(inputs)
   } catch (err) {
     logger.warn("vector-index add batch: embed failed — skipping batch", {
       batchSize: items.length,
@@ -386,19 +393,16 @@ export function registerSearchFunction(sdk: ISdk, kv: StateKV): void {
         enriched.map((r) => r.observation.id),
       )
 
-      const estimateTokens = (value: unknown): number =>
-        Math.max(1, Math.ceil(JSON.stringify(value).length / 3))
-
       const applyTokenBudget = <T>(items: T[]): {
         items: T[]
         used: number
         truncated: boolean
       } => {
-        if (!tokenBudget) return { items, used: items.reduce((sum, item) => sum + estimateTokens(item), 0), truncated: false }
+        if (!tokenBudget) return { items, used: items.reduce((sum, item) => sum + estimateJsonTokens(item), 0), truncated: false }
         const selected: T[] = []
         let used = 0
         for (const item of items) {
-          const itemTokens = estimateTokens(item)
+          const itemTokens = estimateJsonTokens(item)
           if (used + itemTokens > tokenBudget) {
             return { items: selected, used, truncated: selected.length < items.length }
           }

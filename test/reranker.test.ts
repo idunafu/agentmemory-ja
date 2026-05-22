@@ -150,11 +150,28 @@ describe("reranker", () => {
   it("tokenizes query and passages as text pairs", async () => {
     const results = [
       {
-        observation: { id: "o1", title: "認証", narrative: "JWTを検証する" },
+        observation: {
+          id: "o1",
+          title: "認証",
+          subtitle: "ミドルウェア",
+          facts: ["トークンを検証"],
+          narrative: "JWTを検証する",
+          concepts: ["auth"],
+          files: ["src/auth.ts"],
+          type: "file_edit",
+        },
         combinedScore: 0.3,
       },
       {
-        observation: { id: "o2", title: "検索", narrative: "BM25を調整する" },
+        observation: {
+          id: "o2",
+          title: "検索",
+          facts: [],
+          narrative: "BM25を調整する",
+          concepts: [],
+          files: [],
+          type: "file_edit",
+        },
         combinedScore: 0.2,
       },
     ] as any;
@@ -164,7 +181,10 @@ describe("reranker", () => {
     expect(mockTokenizer).toHaveBeenCalledWith(
       ["認証の実装", "認証の実装"],
       {
-        text_pair: ["認証\nJWTを検証する", "検索\nBM25を調整する"],
+        text_pair: [
+          "認証\nミドルウェア\nトークンを検証\nJWTを検証する\nauth\nsrc/auth.ts\nfile_edit",
+          "検索\nBM25を調整する\nfile_edit",
+        ],
         padding: true,
         truncation: true,
       },
@@ -173,6 +193,41 @@ describe("reranker", () => {
     expect(mockTokenizer.mock.calls[0]?.[1].text_pair.join(" ")).not.toContain(
       "[SEP]",
     );
+  });
+
+  it("passes reranker query and passage text without NFKC normalization", async () => {
+    const results = [
+      {
+        observation: {
+          id: "o1",
+          title: "ＡＰＩ設定",
+          facts: [],
+          narrative: "ガードを追加",
+          concepts: [],
+          files: [],
+          type: "file_edit",
+        },
+        combinedScore: 0.3,
+      },
+      {
+        observation: {
+          id: "o2",
+          title: "other",
+          facts: [],
+          narrative: "other",
+          concepts: [],
+          files: [],
+          type: "file_edit",
+        },
+        combinedScore: 0.2,
+      },
+    ] as any;
+
+    await rerank("ＡＰＩ", results);
+
+    expect(mockTokenizer.mock.calls[0]?.[0]).toEqual(["ＡＰＩ", "ＡＰＩ"]);
+    expect(mockTokenizer.mock.calls[0]?.[1].text_pair[0]).toContain("ＡＰＩ設定");
+    expect(mockTokenizer.mock.calls[0]?.[1].text_pair[0]).toContain("ガード");
   });
 
   it("reranks single-logit outputs with sigmoid scores", async () => {

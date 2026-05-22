@@ -17,10 +17,7 @@ import {
   listPinnedSlots,
   renderPinnedContext,
 } from "./slots.js";
-
-function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 3);
-}
+import { estimateTokens } from "../utils/text.js";
 
 function escapeXmlAttr(s: string): string {
   return s
