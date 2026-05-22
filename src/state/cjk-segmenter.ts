@@ -65,24 +65,24 @@ function getJieba(): JiebaInstance | null {
   }
 }
 
-interface JaSegmenter {
-  segment(text: string): string[];
+interface JaTokenizer {
+  tokenize(text: string): string[];
 }
 
-let jaSegmenterInstance: JaSegmenter | null = null;
-let jaSegmenterLoaded = false;
+let jaTokenizer: JaTokenizer | null = null;
+let jaTokenizerLoaded = false;
 
-function getJaSegmenter(): JaSegmenter | null {
-  if (jaSegmenterLoaded) return jaSegmenterInstance;
-  jaSegmenterLoaded = true;
+function getJaTokenizer(): JaTokenizer | null {
+  if (jaTokenizerLoaded) return jaTokenizer;
+  jaTokenizerLoaded = true;
   try {
-    const Ctor = cjkRequire("tiny-segmenter") as new () => JaSegmenter;
-    jaSegmenterInstance = new Ctor();
-    return jaSegmenterInstance;
+    const mod = cjkRequire("wakachigaki") as JaTokenizer;
+    jaTokenizer = { tokenize: mod.tokenize };
+    return jaTokenizer;
   } catch {
     showHintOnce(
-      "tiny-segmenter",
-      "install tiny-segmenter to improve Japanese search; falling back to whole-string tokenization",
+      "wakachigaki",
+      "install wakachigaki to improve Japanese search; falling back to whole-string tokenization",
     );
     return null;
   }
@@ -108,10 +108,10 @@ function segmentHan(text: string): string[] {
 }
 
 function segmentKana(text: string): string[] {
-  const s = getJaSegmenter();
+  const s = getJaTokenizer();
   if (!s) return [text];
   try {
-    return cleanTokens(s.segment(text));
+    return cleanTokens(s.tokenize(text));
   } catch {
     return [text];
   }
@@ -164,6 +164,6 @@ export function __resetCjkSegmenterStateForTests(): void {
   hintShown.clear();
   jiebaInstance = null;
   jiebaLoaded = false;
-  jaSegmenterInstance = null;
-  jaSegmenterLoaded = false;
+  jaTokenizer = null;
+  jaTokenizerLoaded = false;
 }
